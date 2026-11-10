@@ -1,0 +1,63 @@
+# Governance policy.
+---
+# This file is data, not code: change a rule here and the behaviour
+# changes on the next run. Five dimensions, evaluated in this order:
+#
+#   1. tools.allow    only these functions may be called
+#   2. paths          only these paths may be touched
+#   3. budget         steps and tokens per run
+#   4. content        instructions hidden inside tool output
+#   5. audit          every decision is recorded
+
+version: 1
+
+tools:
+  allow:
+    - search_notes
+    - read_note
+
+paths:
+  # Allowed prefixes, relative to the lab root.
+  allow_prefix:
+    - corpus/
+  # Any of these substrings is refused regardless of the prefix above.
+  deny_segments:
+    - ".."
+    - .ssh
+    - .env
+    - .git
+    - id_rsa
+
+budget:
+  max_steps: 12
+  max_tokens: 30000
+
+behavior:
+  # Successful searches required before the model may say "not covered".
+  # 0 disables the gate (baseline); 2 forces one re-search.
+  min_searches_before_refusal: 0
+
+content:
+  # Two-stage test, because a single stage always over-blocks:
+  #   pattern alone         -> suspicious, logged only
+  #                            (a note may describe an attack)
+  #   pattern + action word   -> blocked
+  on_match: quarantine
+  injection_patterns:
+    - ignore previous instructions
+    - ignore all previous instructions
+    - you are now
+    - your new task is
+  action_keywords:
+    - read
+    - print
+    - send
+    - execute
+    - upload
+    - delete
+    - curl
+    - ssh
+    - cat
+
+audit:
+  path: audit.jsonl

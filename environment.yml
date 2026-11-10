@@ -1,0 +1,13 @@
+# 复现环境：conda env create -f environment.yml
+# 删除干净：conda env remove -n harness101
+name: harness101
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      # 唯一的第三方依赖：llm.py 里的 OpenAI-compatible 客户端（LM Studio 也走这套）
+      - openai==3.46.0
+      # pyyaml 现在没有任何 import，所以不钉；D3 落地 guard.py + policy.yaml 时再加：
+      #   - pyyaml==6.0.3
